@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ml-training-cpu
+spec:
+  template:
+    spec:
+      containers:
+      - name: training
+        image: us-central1-docker.pkg.dev/perfect-science-437706-m0/training/training-framework:latest
+        command: ["python", "example_training_script.py", "--device=cpu"]
+        resources:
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        - name: training-data
+          mountPath: /data
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-storage-pvc
+      - name: training-data
+        persistentVolumeClaim:
+          claimName: training-data-pvc
+      restartPolicy: Never
